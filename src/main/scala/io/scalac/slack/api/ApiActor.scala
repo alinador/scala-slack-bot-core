@@ -16,6 +16,7 @@ class ApiActor extends Actor with ActorLogging {
 
   override def receive = {
 
+
     case ApiTest(param, error) =>
       log.debug("api.test requested")
       val send = sender()
