@@ -14,7 +14,6 @@ class ApiActor extends Actor with ActorLogging {
   import context.dispatcher
   import io.scalac.slack.api.Unmarshallers._
 
-  // TEST
   override def receive = {
 
     case ApiTest(param, error) =>
