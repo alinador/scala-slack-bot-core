@@ -9,7 +9,6 @@ import io.scalac.slack.common.{Command, HelpRequest, OutboundMessage}
  */
 
 
-// Test
 class HelpBot(override val bus: MessageEventBus) extends AbstractBot {
   override def act: Receive = {
     case Command("help", options, raw) =>
