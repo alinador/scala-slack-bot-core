@@ -1,7 +1,8 @@
 package io.scalac.slack.websockets
 
-import akka.actor.{Actor, Props}
+import akka.actor.{ActorSystem, Actor, Props}
 import akka.io.IO
+import com.typesafe.config.ConfigFactory
 import io.scalac.slack._
 import spray.can.Http
 import spray.can.server.UHttp
@@ -28,7 +29,8 @@ class WSActor(eventBus: MessageEventBus) extends Actor with WebSocketClientWorke
         HttpHeaders.RawHeader("Sec-WebSocket-Version", "13"),
         HttpHeaders.RawHeader("Sec-WebSocket-Key", Config.websocketKey))
       request = HttpRequest(HttpMethods.GET, resource, headers)
-      IO(UHttp)(context.system) ! Http.Connect(host, port, ssl)
+      val config = ConfigFactory.parseString("akka.remote.netty.tcp.port = 2552")
+      IO(UHttp)(ActorSystem("websocket", config)) ! Http.Connect(host, port, ssl)
   }
 
   override def businessLogic = {
