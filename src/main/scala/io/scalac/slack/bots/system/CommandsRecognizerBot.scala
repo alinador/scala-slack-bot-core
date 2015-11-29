@@ -8,7 +8,10 @@ class CommandsRecognizerBot(override val bus: MessageEventBus) extends IncomingM
 
   val commandChar = '$'
 
+  val splitPattern = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'".r
+
   def receive: Receive = {
+
 
     case bm@BaseMessage(text, channel, user, dateTime, edited) =>
       //COMMAND links list with bot's nam jack can be called:
@@ -19,8 +22,9 @@ class CommandsRecognizerBot(override val bus: MessageEventBus) extends IncomingM
       // $link list
       def changeIntoCommand(pattern: String): Boolean = {
         if (text.trim.startsWith(pattern)) {
-          val tokenized = text.trim.drop(pattern.length).trim.split("\\s")
-          publish(Command(tokenized.head, tokenized.tail.toList.filter(_.nonEmpty), bm))
+          val all = splitPattern.findAllIn(text.trim.drop(pattern.length).trim).toList
+          val tokenized = all.map(_.replaceAll("\"", ""))
+          publish(Command(tokenized.head, tokenized.tail.filter(_.nonEmpty), bm))
           true
         }
         false
