@@ -1,17 +1,16 @@
 package io.scalac.slack.common.actors
 
 import java.util.concurrent.TimeUnit
-
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.util.Timeout
 import io.scalac.slack.api.{ApiActor, ApiTest, AuthData, AuthTest, BotInfo, Connected, RegisterModules, RtmData, RtmStart, RtmStartResponse, Start, Stop}
-import io.scalac.slack.common.{BotInfoKeeper, RegisterDirectChannels, RegisterUsers, Shutdownable}
+import io.scalac.slack.common.{BotInfoKeeper, RegisterDirectChannels, RegisterUsers}
 import io.scalac.slack.websockets.{WSActor, WebSocket}
 import io.scalac.slack.{BotModules, Config, MessageEventBus, MigrationInProgress, OutgoingRichMessageProcessor, SlackError}
 
 import scala.concurrent.duration._
 
-class SlackBotActor(modules: BotModules, eventBus: MessageEventBus, master: Shutdownable, usersStorageOpt: Option[ActorRef] = None) extends Actor with ActorLogging {
+class SlackBotActor(modules: BotModules, eventBus: MessageEventBus, usersStorageOpt: Option[ActorRef] = None) extends Actor with ActorLogging {
 
   import context.{dispatcher, system}
 
@@ -27,7 +26,7 @@ class SlackBotActor(modules: BotModules, eventBus: MessageEventBus, master: Shut
       log.info("trying to connect to Slack's server...")
       api ! ApiTest()
     case Stop =>
-      master.shutdown()
+//      master.shutdown()
     case Connected =>
       log.info("connected successfully...")
       log.info("trying to auth")
@@ -66,7 +65,7 @@ class SlackBotActor(modules: BotModules, eventBus: MessageEventBus, master: Shut
       system.scheduler.scheduleOnce(10.seconds, self, Start)
     case se: SlackError =>
       log.error(s"SlackError occured [${se.toString}]")
-      master.shutdown()
+//      master.shutdown()
     case res: RtmStartResponse =>
       if(usersStorageOpt.isDefined) {
         val userStorage = usersStorageOpt.get

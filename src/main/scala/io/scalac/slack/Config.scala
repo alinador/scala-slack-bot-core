@@ -7,13 +7,16 @@ import io.scalac.slack.api.APIKey
  * Created on 20.01.15 22:17
  */
 object Config {
+
+  val baseConfig = "slack-api"
+
   def websocketKey: String = config.getString("websocket.key")
 
   private val config = ConfigFactory.load()
 
-  def apiKey: APIKey = APIKey(config.getString("api.key"))
+  def apiKey: APIKey = APIKey(config.getString(s"$baseConfig.key"))
 
-  def baseUrl(endpoint: String) = config.getString("api.base.url") + endpoint
+  def baseUrl(endpoint: String) = config.getString(s"$baseConfig.base.url") + endpoint
 
   def scalaLibraryPath = config.getString("scalaLibraryPath")
 

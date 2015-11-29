@@ -14,6 +14,8 @@ class ApiActor extends Actor with ActorLogging {
   import context.dispatcher
   import io.scalac.slack.api.Unmarshallers._
 
+  val slackApiClient = new SlackApiClient()
+
   override def receive = {
 
 
@@ -22,7 +24,7 @@ class ApiActor extends Actor with ActorLogging {
       val send = sender()
       val params = Map("param" -> param, "error" -> error).collect { case (key, Some(value)) => key -> value }
 
-      SlackApiClient.get[ApiTestResponse]("api.test", params) onComplete {
+      slackApiClient.get[ApiTestResponse]("api.test", params) onComplete {
         case Success(res) =>
           if (res.ok) {
             send ! Connected
@@ -39,7 +41,7 @@ class ApiActor extends Actor with ActorLogging {
       log.debug("auth.test requested")
       val send = sender()
 
-      SlackApiClient.get[AuthTestResponse]("auth.test", Map("token" -> token.key)) onComplete {
+      slackApiClient.get[AuthTestResponse]("auth.test", Map("token" -> token.key)) onComplete {
         case Success(res) =>
 
           if (res.ok)
@@ -54,7 +56,7 @@ class ApiActor extends Actor with ActorLogging {
       log.debug("rtm.start requested")
       val send = sender()
 
-      SlackApiClient.get[RtmStartResponse]("rtm.start", Map("token" -> token.key)) onComplete {
+      slackApiClient.get[RtmStartResponse]("rtm.start", Map("token" -> token.key)) onComplete {
 
         case Success(res) =>
           if (res.ok) {
@@ -71,7 +73,7 @@ class ApiActor extends Actor with ActorLogging {
       val attachments = msg.elements.filter(_.isValid).map(_.toJson).mkString("[", ",", "]")
       val params = Map("token" -> Config.apiKey.key, "channel" -> msg.channel, "as_user" -> "true", "attachments" -> attachments)
 
-      SlackApiClient.post[ChatPostMessageResponse]("chat.postMessage", params) onComplete {
+      slackApiClient.post[ChatPostMessageResponse]("chat.postMessage", params) onComplete {
         case Success(res) =>
           if (res.ok) {
             log.info("[chat.postMessage]: message delivered: " + res.toString)

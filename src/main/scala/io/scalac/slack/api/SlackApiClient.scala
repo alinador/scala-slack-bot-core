@@ -1,6 +1,6 @@
 package io.scalac.slack.api
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorContext, ActorSystem}
 import akka.event.Logging
 import io.scalac.slack.Config
 import spray.client.pipelining._
@@ -12,11 +12,9 @@ import scala.concurrent.Future
 /**
  * Created on 29.01.15 22:43
  */
-object SlackApiClient extends ApiClient{
+class SlackApiClient(implicit system:ActorContext) extends ApiClient{
 
   val log = Logging
-
-  implicit val system = ActorSystem("SlackApiClient")
 
   import system.dispatcher
 
