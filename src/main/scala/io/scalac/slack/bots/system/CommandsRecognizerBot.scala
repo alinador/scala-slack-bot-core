@@ -10,10 +10,22 @@ class CommandsRecognizerBot(override val bus: MessageEventBus) extends IncomingM
 
   val splitPattern = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'".r
 
+
+
   def receive: Receive = {
 
 
     case bm@BaseMessage(text, channel, user, dateTime, edited) =>
+
+
+      def cleanSpecialCharacters(token:String):String = {
+        if(token.endsWith(">") &&
+          (token.startsWith("<http://") || token.startsWith("<https://") || token.startsWith("<www.")))
+          token.drop(1).dropRight(1)
+        else token
+      }
+
+
       //COMMAND links list with bot's nam jack can be called:
       // jack link list
       // jack: link list
@@ -23,7 +35,7 @@ class CommandsRecognizerBot(override val bus: MessageEventBus) extends IncomingM
       def changeIntoCommand(pattern: String): Boolean = {
         if (text.trim.startsWith(pattern)) {
           val all = splitPattern.findAllIn(text.trim.drop(pattern.length).trim).toList
-          val tokenized = all.map(_.replaceAll("\"", ""))
+          val tokenized = all.map(_.replaceAll("\"", "")).map(cleanSpecialCharacters)
           publish(Command(tokenized.head, tokenized.tail.filter(_.nonEmpty), bm))
           true
         }
